@@ -1,12 +1,15 @@
-import db from "../../../db";
-import { advocates } from "../../../db/schema";
-import { advocateData } from "../../../db/seed/advocates";
+import { getAdvocates } from './advocates.service';
 
-export async function GET() {
-  // Uncomment this line to use a database
-  // const data = await db.select().from(advocates);
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
 
-  const data = advocateData;
+  const advocates = await getAdvocates({
+    page: Number(searchParams.get('page')) || 1,
+    pageSize: Number(searchParams.get('pageSize')) || 10,
+    searchTerm: searchParams.get('search') || '',
+    specialtyIds: searchParams.getAll('specialties').map((id) => parseInt(id)),
+    yoeGte: Number(searchParams.get('yoeGte')) || undefined
+  });
 
-  return Response.json({ data });
+  return Response.json({ advocates });
 }
