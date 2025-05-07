@@ -9,6 +9,8 @@ export type AdvocateSearchParams = {
   yoeGte?: number; // yearsOfExperience >= range queries
 };
 
+export type Specialty = InferSelectModel<typeof specialties>;
+
 export type AdvocateDetails = InferSelectModel<typeof advocates> & {
-  specialties: InferSelectModel<typeof specialties>[];
+  specialties: Specialty[];
 };
