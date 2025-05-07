@@ -1,13 +1,30 @@
 'use client';
 
 import { AdvocateDetails } from '@/types';
-import { ChangeEventHandler, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  Button,
+  Empty,
+  GetProps,
+  Input,
+  Typography,
+  theme,
+} from 'antd';
+import AdvocatesTable from './components/advocates-table';
+
+const { Search } = Input;
+const { Title } = Typography;
+
+type SearchProps = GetProps<typeof Search>;
 
 export default function Home() {
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
   const [advocates, setAdvocates] = useState<AdvocateDetails[]>([]);
-  const [searchText, setSearchText] = useState('');
   const [search, setSearch] = useState('');
 
+  // TODO: switch to using tanstack-query
   useEffect(() => {
     fetch(`/api/advocates?page=1&search=${search}`).then((response) => {
       response.json().then((jsonResponse) => {
@@ -16,65 +33,37 @@ export default function Home() {
     });
   }, [search]);
 
-  const onChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    setSearchText(event.target.value);
-  };
-
-  const onClick = () => {
-    setSearch(searchText);
-  };
+  const onSearch: SearchProps['onSearch'] = (value) =>
+    setSearch(value);
 
   return (
-    <main style={{ margin: '24px' }}>
-      <h1>Solace Advocates</h1>
-      <br />
-      <br />
-      <div>
-        <p>Search</p>
-        <p>
-          Searching for: <span id="search-term"></span>
-        </p>
-        <input
-          style={{ border: '1px solid black' }}
-          onChange={onChange}
-          value={searchText}
-        />
-        <button onClick={onClick}>Search</button>
+    <div
+      className="flex flex-col h-full p-6"
+      style={{
+        background: colorBgContainer,
+        borderRadius: borderRadiusLG,
+      }}
+    >
+      <Title>Solace Advocates</Title>
+
+      <div className="my-8">
+        <Title level={2}>Search</Title>
+        <div className="flex justify-between">
+          <Search
+            allowClear
+            placeholder="input search text"
+            style={{ minWidth: 200, maxWidth: 500 }}
+            onSearch={onSearch}
+          />
+
+          <Button>Reset Search</Button>
+        </div>
       </div>
-      <br />
-      <br />
-      <table>
-        <thead>
-          <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>City</th>
-            <th>Degree</th>
-            <th>Specialties</th>
-            <th>Years of Experience</th>
-            <th>Phone Number</th>
-          </tr>
-        </thead>
-        <tbody>
-          {advocates.map((advocate) => {
-            return (
-              <tr key={advocate.id}>
-                <td>{advocate.firstName}</td>
-                <td>{advocate.lastName}</td>
-                <td>{advocate.city}</td>
-                <td>{advocate.degree}</td>
-                <td>
-                  {advocate.specialties.map((s) => (
-                    <div>{s.name}</div>
-                  ))}
-                </td>
-                <td>{advocate.yearsOfExperience}</td>
-                <td>{advocate.phoneNumber}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </main>
+      {!advocates.length && search ? (
+        <Empty description="We did not find any results, try changing your search and filters!" />
+      ) : (
+        <AdvocatesTable data={advocates}  />
+      )}
+    </div>
   );
 }
