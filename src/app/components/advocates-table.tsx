@@ -3,14 +3,34 @@ import { Table, Tag } from 'antd';
 
 type Props = {
   data: AdvocateDetails[];
+  searchTokens: string[];
 };
 
-const AdvocatesTable = ({ data }: Props) => {
+const AdvocatesTable = ({ data, searchTokens = [] }: Props) => {
   const columns = [
     {
       title: 'First Name',
       dataIndex: 'firstName',
       key: 'firstName',
+      render: (value: string) => {
+        const matching = searchTokens.filter((token) =>
+          value.toLowerCase().includes(token.toLowerCase())
+        );
+        
+        if (matching.length && searchTokens.length) {
+          const token = matching[0];
+
+          const matchIndex = value.toLowerCase().indexOf(token);
+
+          const firstPart = value.substring(0, matchIndex);
+          const highlight = value.substring(matchIndex, token.length);
+          const endingPart = value.substring(matchIndex + token.length);
+
+          return <div>{firstPart}<strong>{highlight}</strong>{endingPart}</div>;
+        }
+
+        return <div>{value}</div>;
+      },
     },
     {
       title: 'Last Name',

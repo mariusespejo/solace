@@ -62,7 +62,7 @@ export default function Home() {
       {!advocates.length && search ? (
         <Empty description="We did not find any results, try changing your search and filters!" />
       ) : (
-        <AdvocatesTable data={advocates}  />
+        <AdvocatesTable data={advocates} searchTokens={search.split(' ').filter(Boolean)}  />
       )}
     </div>
   );
